@@ -41,7 +41,7 @@ A full-stack web application for managing mobile subscriptions with real-time up
 
 1. **Clone the repository**
 
-    git clone <your-repo-url>
+    git clone <https://github.com/Nonkosii/subscription-management-app>
     cd subscription-management-app
 
 2.  **Setup Backend**
