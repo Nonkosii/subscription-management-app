@@ -2,6 +2,28 @@
 
 A full-stack web application for managing mobile subscriptions with real-time updates, OTP authentication, and admin dashboard.
 
+## Important Architecture Note: In-Memory Data Storage
+
+This application currently uses **in-memory data storage** for demonstration purposes. This means:
+
+### Limitations:
+- **Data is not persisted** - All user data, subscriptions, and transactions are lost when the server restarts
+- **Not production-ready** - This is a demo application only
+- **Single server instance only** - Cannot be scaled horizontally
+- **No data backup** - No recovery mechanism for lost data
+
+### Intended Use:
+- Development and testing environments only
+- Demo purposes and proof-of-concept
+- Educational examples of real-time functionality
+
+### Production Considerations:
+For production use, you would need to:
+1. Replace in-memory storage with a proper database (MongoDB)
+2. Implement proper data persistence layers
+3. Add database migration scripts
+4. Implement backup and recovery procedures
+
 ## Features
 
 - **OTP-based Authentication** - Secure login with mobile number verification
@@ -93,6 +115,16 @@ A full-stack web application for managing mobile subscriptions with real-time up
 ### Base URL
 
 http://localhost:5000
+
+## Data Persistence Note
+
+**Important**: This API uses in-memory storage. All data is temporary and will be lost when the server restarts. This includes:
+- User sessions and authentication tokens
+- Subscription records  
+- Transaction history
+- Admin dashboard statistics
+
+For production use, implement proper database persistence.
 
 ### Authentication Endpoints
 
