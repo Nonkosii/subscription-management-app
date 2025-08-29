@@ -48,7 +48,7 @@ export default function Dashboard({ onLogout }) {
   const [activeTab, setActiveTab] = useState('services');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   // Custom socket hook
   const { socket, isConnected, connectionError, disconnect: disconnectSocket } = useSocket('http://localhost:5000', {
@@ -58,6 +58,23 @@ export default function Dashboard({ onLogout }) {
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
   });
+
+  // Check token expiration on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp * 1000 < Date.now()) {
+          logout();
+          window.location.href = '/';
+        }
+      } catch (error) {
+        logout();
+        window.location.href = '/';
+      }
+    }
+  }, [logout]);
 
   // Load initial data
   useEffect(() => {
@@ -77,14 +94,19 @@ export default function Dashboard({ onLogout }) {
         setTransactions(txRes.data.transactions || []);
       } catch (err) {
         console.error("Error loading dashboard data:", err);
-        setError('Failed to load data. Please try again.');
+        if (err.message === 'Token expired') {
+          logout();
+          window.location.href = '/';
+        } else {
+          setError('Failed to load data. Please try again.');
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [user]);
+  }, [user, logout]);
 
   // Realtime updates
   useEffect(() => {
@@ -126,10 +148,13 @@ export default function Dashboard({ onLogout }) {
       
       alert(`Successfully subscribed to ${name}!`);
     } catch (err) {
-      if (err.response?.status === 402) {
+      if (err.message === 'Token expired') {
+        logout();
+        window.location.href = '/';
+      } else if (err.response?.status === 402) {
         alert(`Payment failed: ${err.response.data.message || 'Insufficient funds'}`);
       } else if (err.response?.status === 400) {
-        alert(`ℹ️ ${err.response.data.message}`);
+        alert(`${err.response.data.message}`);
       } else {
         console.error('Subscription error:', err);
         alert('Failed to subscribe. Please try again.');
@@ -147,8 +172,13 @@ export default function Dashboard({ onLogout }) {
       
       alert(`Successfully unsubscribed from ${name}!`);
     } catch (err) {
-      console.error(err);
-      alert('Failed to unsubscribe. Please try again.');
+      if (err.message === 'Token expired') {
+        logout();
+        window.location.href = '/';
+      } else {
+        console.error(err);
+        alert('Failed to unsubscribe. Please try again.');
+      }
     }
   };
 

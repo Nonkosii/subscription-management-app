@@ -9,6 +9,15 @@ const API = axios.create({
 API.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
   if (token) {
+    // Check if token is expired before sending request
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('msisdn');
+      window.location.href = '/';
+      return Promise.reject(new Error('Token expired'));
+    }
+    
     config.headers.Authorization = `Bearer ${token}`;
   }
   config.headers['Content-Type'] = 'application/json';

@@ -69,10 +69,6 @@ export default function LandingPage({ onNext }) {
             </>
           ) : 'Send OTP'}
         </button>
-        
-        <p className="text-xs text-gray-500 mt-6 text-center">
-          By continuing, you agree to our Terms of Service and Privacy Policy
-        </p>
       </div>
     </div>
   )

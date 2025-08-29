@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../hooks/useSocket';
 
 export default function AdminDashboard({ onLogout }) {
   const [users, setUsers] = useState({});
   const [servicesUsage, setServicesUsage] = useState({});
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   // Service names mapping
   const serviceNames = {
@@ -14,7 +14,7 @@ export default function AdminDashboard({ onLogout }) {
     '3': 'Daily News'
   };
 
-  // Function to calculate service usage from all users
+  //  Calculate service usage from all users
   const calculateServiceUsage = useCallback((usersData) => {
     const usage = {};
     
@@ -32,12 +32,29 @@ export default function AdminDashboard({ onLogout }) {
     transports: ['websocket', 'polling']
   });
 
+  // Check token expiration on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp * 1000 < Date.now()) {
+          logout();
+          window.location.href = '/';
+        }
+      } catch (error) {
+        logout();
+        window.location.href = '/';
+      }
+    }
+  }, [logout]);
+
   // Socket event handlers
   useEffect(() => {
     if (!socket) return;
 
     const handleSubscriptionUpdate = (data) => {
-      console.log('📊 Subscription update received:', data);
+      console.log('Subscription update received:', data);
       
       setUsers(prevUsers => {
         const updatedUsers = { ...prevUsers, [data.user]: data.subscriptions };
